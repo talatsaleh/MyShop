@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shop_app/Screens/products_detail_Screen.dart';
-import 'package:shop_app/models/product.dart';
+import 'package:provider/provider.dart';
+
+import '../Screens/products_detail_Screen.dart';
+import '../providers/products.dart';
+import '../providers/cart.dart';
 
 class ProductItem extends StatelessWidget {
-  final Product product;
-
-  ProductItem(this.product);
-
   Widget iconBuilder(IconData icon, Function() pressed, BuildContext ctx) {
     return IconButton(
       color: Theme.of(ctx).accentColor,
@@ -17,6 +16,8 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final product = Provider.of<Product>(context,listen: false);
+    final cart = Provider.of<Cart>(context,listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GridTile(
@@ -26,13 +27,20 @@ class ProductItem extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           backgroundColor: Colors.black87,
-          leading: iconBuilder(Icons.favorite, () => null, context),
-          trailing: iconBuilder(Icons.shopping_cart, () => null, context),
+          leading: Consumer<Product>(
+            builder: (ctx, product, _) => iconBuilder(
+                product.isFavorite == false
+                    ? Icons.favorite_border_outlined
+                    : Icons.favorite,
+                () => product.toggleFavorite(),
+                context),
+          ),
+          trailing: iconBuilder(Icons.shopping_cart, () => cart.addItem(product), context),
         ),
         child: GestureDetector(
           onTap: () {
             Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
-                arguments: product);
+                arguments: product.id);
           },
           child: Image.network(product.imageUrl, fit: BoxFit.cover),
         ),
