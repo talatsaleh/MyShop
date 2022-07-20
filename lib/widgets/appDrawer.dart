@@ -1,6 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_app/Screens/orders_screen.dart';
+
+import '../Screens/orders_screen.dart';
+import '../Screens/user_products_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   Widget listTileBuilder(
@@ -27,7 +28,7 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: Column(children: [
         AppBar(
-          title: Text('Hello Fake User'),
+          title: const Text('Hello Fake User'),
           automaticallyImplyLeading: false,
         ),
         listTileBuilder(
@@ -37,13 +38,22 @@ class AppDrawer extends StatelessWidget {
               Navigator.of(context).pushReplacementNamed('/');
             },
             context: context),
-        Divider(),
+        const Divider(),
         listTileBuilder(
             title: 'My Orders',
             icons: Icons.payment,
             onPressed: () {
               Navigator.of(context)
                   .pushReplacementNamed(OrdersScreen.routeName);
+            },
+            context: context),
+        const Divider(),
+        listTileBuilder(
+            title: 'Manage Products',
+            icons: Icons.edit,
+            onPressed: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(UserProductScreen.routeName);
             },
             context: context)
       ]),

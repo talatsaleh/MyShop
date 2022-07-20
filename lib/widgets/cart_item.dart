@@ -8,6 +8,7 @@ class CartItems extends StatelessWidget {
   final CartItem cart;
 
   CartItems(this.cart, this.id);
+
   @override
   Widget build(BuildContext context) {
     return Dismissible(
@@ -15,7 +16,9 @@ class CartItems extends StatelessWidget {
       background: Container(
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
         padding: const EdgeInsets.all(8),
-        color: Theme.of(context).errorColor,
+        color: Theme
+            .of(context)
+            .errorColor,
         alignment: Alignment.centerRight,
         child: const Icon(
           Icons.delete,
@@ -24,8 +27,23 @@ class CartItems extends StatelessWidget {
         ),
       ),
       direction: DismissDirection.endToStart,
-      onDismissed: (direction){
-        Provider.of<Cart>(context,listen: false).removeProduct(id);
+      confirmDismiss: (direction) {
+        return showDialog(context: context, builder: (ctx) =>
+            AlertDialog(
+              title: Text('Are you sure?'),
+              content: Text('Do you want to remove this item?'),
+              actions: [
+                TextButton(onPressed: () {
+                  Navigator.of(context).pop(false);
+                }, child: Text('No')),
+                TextButton(onPressed: () {
+                  Navigator.of(context).pop(true);
+                }, child: Text('Yes'))
+              ],
+            ),);
+      },
+      onDismissed: (direction) {
+        Provider.of<Cart>(context, listen: false).removeProduct(id);
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),

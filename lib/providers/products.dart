@@ -70,8 +70,22 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  void addProduct() {
-    // _items.add(value);
+  void addProduct(Product addedProduct) {
+    final product = Product(
+        id: DateTime.now().toString(),
+        title: addedProduct.title,
+        description: addedProduct.description,
+        imageUrl: addedProduct.imageUrl,
+        price: addedProduct.price);
+    _items.insert(0, product);
+    notifyListeners();
+  }
+  void updateProduct(Product newProduct){
+    _items[_items.indexWhere((product) => product.id == newProduct.id)] = newProduct;
+    notifyListeners();
+  }
+  void deleteProduct(String id){
+    _items.removeWhere((product) => product.id == id);
     notifyListeners();
   }
 }
