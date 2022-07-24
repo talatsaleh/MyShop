@@ -32,12 +32,16 @@ class _EditProductScreenState extends State<EditProductScreen> {
             _editedProduct.id.isEmpty
                 ? Text('product ${_editedProduct.title} has been added')
                 : Text('product ${_editedProduct.title} has been updated'),
-            const FittedBox(
-              child: CircleAvatar(
-                backgroundColor: Colors.green,
-                child: Icon(
-                  Icons.check,
-                  color: Colors.white,
+            const SizedBox(width: 8,),
+            const SizedBox(
+              height: 20,
+              child: FittedBox(
+                child: CircleAvatar(
+                  backgroundColor: Colors.green,
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             )
@@ -72,6 +76,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   void didChangeDependencies() {
+    final navigation = Navigator.of(context);
     if (_isInit) {
       if (ModalRoute.of(context)?.settings.arguments != null) {
         _editedProduct = ModalRoute.of(context)?.settings.arguments as Product;
@@ -93,38 +98,36 @@ class _EditProductScreenState extends State<EditProductScreen> {
     setState(() {
       _isLoading = true;
     });
-    if (_editedProduct.id.isEmpty) {
-      try {
+    try {
+      if (_editedProduct.id.isEmpty) {
         await Provider.of<Products>(context, listen: false)
             .addProduct(_editedProduct);
-      } catch (erorr) {
-        await showDialog<Null>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: const Text('there is something wrong happened!'),
-                  content: const Text(
-                      'there is something wrong please try again or report for dev..'),
-                  actions: [
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                        },
-                        child: const Text('okay'))
-                  ],
-                ));
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.of(context).pop();
-        _snackBar();
+      } else {
+        await Provider.of<Products>(context, listen: false)
+            .updateProduct(_editedProduct);
       }
-    } else {
-      Provider.of<Products>(context, listen: false)
-          .updateProduct(_editedProduct);
+    } catch (erorr) {
+      print(erorr);
+      await showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: const Text('there is something wrong happened!'),
+                content: const Text(
+                    'there is something wrong please try again or report for dev..'),
+                actions: [
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: const Text('okay'))
+                ],
+              ));
+    }
+      setState(() {
+        _isLoading = false;
+      });
       Navigator.of(context).pop();
       _snackBar();
-    }
   }
 
   @override

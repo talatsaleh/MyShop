@@ -4,6 +4,7 @@ import 'package:shop_app/Screens/cart_screen.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/widgets/appDrawer.dart';
 import 'package:shop_app/widgets/badge.dart';
+import '../providers/products.dart';
 import '../widgets/products_grid.dart';
 
 enum FilterOptions {
@@ -18,6 +19,28 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavoritesData = false;
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  initState() {
+    // Future.delayed(Duration.zero)
+    //     .then((_) => Provider.of<Products>(context).fetchAndSetData());
+    super.initState();
+  }
+
+  @override
+  didChangeDependencies() {
+    if (_isInit) {
+      _isLoading = true;
+      Provider.of<Products>(context).fetchAndSetData().then((_) {
+        _isLoading = false;
+      });
+      _isInit = false;
+    }
+
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +80,15 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                       onPressed: () {
                         Navigator.of(context).pushNamed(CartScreen.routeName);
                       },
-                      icon: Icon(Icons.shopping_cart))))
+                      icon: const Icon(Icons.shopping_cart))))
         ],
         title: const Text('MyShop'),
       ),
-      body: ProductsGrid(_showOnlyFavoritesData),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavoritesData),
     );
   }
 }
