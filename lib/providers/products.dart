@@ -143,7 +143,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final updateUrl = Uri.parse(
-        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products/$id');
+        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
     final excitingProdIndex = _items.indexWhere((product) => product.id == id);
     Product? excitingProd = _items[excitingProdIndex];
     _items.removeWhere((product) => product.id == id);
