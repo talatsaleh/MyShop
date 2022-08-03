@@ -11,23 +11,38 @@ class Product with ChangeNotifier {
   final String imageUrl;
   bool isFavorite;
 
-  Product(
-      {required this.id,
-      required this.title,
-      required this.description,
-      required this.imageUrl,
-      required this.price,
-      this.isFavorite = false});
+  Product({required this.id,
+    required this.title,
+    required this.description,
+    required this.imageUrl,
+    required this.price,
+    this.isFavorite = false});
 
-  void toggleFavorite() {
+  Future<void> toggleFavorite(String authToken, String userId) async {
+    final url = Uri.parse(
+        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/users/$userId/userFav/$id.json?auth=$authToken');
+    bool old = isFavorite;
     isFavorite = !isFavorite;
-    notifyListeners();
+    try {
+      final response = await http.put(url, body: jsonEncode(isFavorite));
+      if (response.statusCode >= 400) {
+        isFavorite = old;
+      }
+      notifyListeners();
+    } catch (error) {
+      isFavorite = old;
+      notifyListeners();
+      rethrow;
+    }
   }
 }
 
 class Products with ChangeNotifier {
-  final url = Uri.parse(
-      'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products.json');
+  final String? authToken;
+  final String? userId;
+
+  Products(this.authToken, this.userId, this._items);
+
   List<Product> _items = [];
 
   //   Product(
@@ -63,26 +78,35 @@ class Products with ChangeNotifier {
   //         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
   //   ),
   // ]; //dummy data
-  Future<void> fetchAndSetData() async {
-    ;
+  Future<void> fetchAndSetData([bool userOnly = false]) async {
+    final userOnlyData = userOnly ? '&orderBy="creatorId"&equalTo="$userId"' : '';
+    final favUrl = Uri.parse('https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/users/$userId/userFav.json?auth=$authToken');
+    final url = Uri.parse(
+        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken$userOnlyData');
+
     try {
       final response = await http.get(url);
+      print(json.decode(response.body));
+      final favoriteResponse = await http.get(favUrl);
+      final extractFav = json.decode(favoriteResponse.body) ?? {};
       final extractData = json.decode(response.body) as Map<String, dynamic>;
       List<Product> loadedData = [];
       extractData.forEach((prodId, prodData) {
         loadedData.add(
           Product(
-              id: prodId,
-              title: prodData['title'],
-              description: prodData['description'],
-              imageUrl: prodData['imageUrl'],
-              price: prodData['price'],
-              isFavorite: prodData['isFavorite']),
+            id: prodId,
+            title: prodData['title'],
+            description: prodData['description'],
+            imageUrl: prodData['imageUrl'],
+            price: prodData['price'],
+            isFavorite: extractFav[prodId] ?? false,
+          ),
         );
       });
       _items = loadedData;
       notifyListeners();
     } catch (error) {
+      print(error);
       rethrow;
     }
   }
@@ -100,6 +124,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product addedProduct) async {
+    final url = Uri.parse(
+        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken');
     try {
       final response = await http.post(url,
           body: json.encode({
@@ -107,8 +133,10 @@ class Products with ChangeNotifier {
             'description': addedProduct.description,
             'imageUrl': addedProduct.imageUrl,
             'price': addedProduct.price,
-            'isFavorite': addedProduct.isFavorite
+            'isFavorite': addedProduct.isFavorite,
+            'creatorId': userId,
           }));
+      print(json.decode(response.body));
       final product = Product(
           id: jsonDecode(response.body)['name'],
           title: addedProduct.title,
@@ -124,7 +152,8 @@ class Products with ChangeNotifier {
 
   Future<void> updateProduct(Product newProduct) async {
     final updateUrl = Uri.parse(
-        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products/${newProduct.id}.json');
+        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products/${newProduct
+            .id}.json?auth=$authToken');
     try {
       await http.patch(updateUrl,
           body: json.encode({
@@ -143,18 +172,16 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final updateUrl = Uri.parse(
-        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+        'https://flutter-tutorial-be86e-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken');
     final excitingProdIndex = _items.indexWhere((product) => product.id == id);
     Product? excitingProd = _items[excitingProdIndex];
     _items.removeWhere((product) => product.id == id);
     notifyListeners();
-    print('deleted');
     final response = await http.delete(updateUrl);
     if (response.statusCode >= 400) {
-        _items.insert(excitingProdIndex, excitingProd);
-        print('un deleting');
-        notifyListeners();
-        throw const HttpException('deleting has failed..');
+      _items.insert(excitingProdIndex, excitingProd);
+      notifyListeners();
+      throw const HttpException('deleting has failed..');
     }
     excitingProd = null;
   }

@@ -7,7 +7,7 @@ class CartItems extends StatelessWidget {
   final String id;
   final CartItem cart;
 
-  CartItems(this.cart, this.id);
+  const CartItems(this.cart, this.id);
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +30,15 @@ class CartItems extends StatelessWidget {
       confirmDismiss: (direction) {
         return showDialog(context: context, builder: (ctx) =>
             AlertDialog(
-              title: Text('Are you sure?'),
-              content: Text('Do you want to remove this item?'),
+              title: const Text('Are you sure?'),
+              content: const Text('Do you want to remove this item?'),
               actions: [
                 TextButton(onPressed: () {
                   Navigator.of(context).pop(false);
-                }, child: Text('No')),
+                }, child: const Text('No')),
                 TextButton(onPressed: () {
                   Navigator.of(context).pop(true);
-                }, child: Text('Yes'))
+                }, child: const Text('Yes'))
               ],
             ),);
       },

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 
 import '../Screens/orders_screen.dart';
 import '../Screens/user_products_screen.dart';
@@ -26,37 +28,50 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(children: [
-        AppBar(
-          title: const Text('Hello Fake User'),
-          automaticallyImplyLeading: false,
-        ),
-        listTileBuilder(
-            title: 'Shop',
-            icons: Icons.shop,
-            onPressed: () {
-              Navigator.of(context).pushReplacementNamed('/');
-            },
-            context: context),
-        const Divider(),
-        listTileBuilder(
-            title: 'My Orders',
-            icons: Icons.payment,
-            onPressed: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(OrdersScreen.routeName);
-            },
-            context: context),
-        const Divider(),
-        listTileBuilder(
-            title: 'Manage Products',
-            icons: Icons.edit,
-            onPressed: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(UserProductScreen.routeName);
-            },
-            context: context)
-      ]),
+      child: Column(
+        children: [
+          AppBar(
+            title: const Text('Hello Fake User'),
+            automaticallyImplyLeading: false,
+          ),
+          listTileBuilder(
+              title: 'Shop',
+              icons: Icons.shop,
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+              context: context),
+          const Divider(),
+          listTileBuilder(
+              title: 'My Orders',
+              icons: Icons.payment,
+              onPressed: () {
+                Navigator.of(context)
+                    .pushReplacementNamed(OrdersScreen.routeName);
+              },
+              context: context),
+          const Divider(),
+          listTileBuilder(
+              title: 'Manage Products',
+              icons: Icons.edit,
+              onPressed: () {
+                Navigator.of(context)
+                    .pushReplacementNamed(UserProductScreen.routeName);
+              },
+              context: context),
+          const Divider(),
+          listTileBuilder(
+              title: 'Login Out',
+              icons: Icons.exit_to_app,
+              onPressed: () {
+                Navigator.of(context).pop();
+                Provider.of<Auth>(context,listen: false).logOut();
+                // Navigator.of(context)
+                //     .pushReplacementNamed(UserProductScreen.routeName);
+              },
+              context: context),
+        ],
+      ),
     );
   }
 }

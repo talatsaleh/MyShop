@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
 import '../providers/products.dart';
 
 class CartItem {
@@ -27,19 +27,21 @@ class Cart with ChangeNotifier {
     if (_items.containsKey(product.id)) {
       _items.update(
           product.id,
-          (existingCartItem) => CartItem(
-              id: existingCartItem.id,
-              title: existingCartItem.title,
-              price: existingCartItem.price,
-              quantity: existingCartItem.quantity + 1));
+              (existingCartItem) =>
+              CartItem(
+                  id: existingCartItem.id,
+                  title: existingCartItem.title,
+                  price: existingCartItem.price,
+                  quantity: existingCartItem.quantity + 1));
     } else {
       _items.putIfAbsent(
           product.id,
-          () => CartItem(
-              id: DateTime.now().toString(),
-              title: product.title,
-              price: product.price,
-              quantity: 1));
+              () =>
+              CartItem(
+                  id: DateTime.now().toString(),
+                  title: product.title,
+                  price: product.price,
+                  quantity: 1));
     }
     notifyListeners();
   }
@@ -68,20 +70,21 @@ class Cart with ChangeNotifier {
     if (_items[productId]!.quantity > 1) {
       _items.update(
         productId,
-        (oldProduct) => CartItem(
-            id: oldProduct.id,
-            title: oldProduct.title,
-            price: oldProduct.price,
-            quantity: oldProduct.quantity - 1),
+            (oldProduct) =>
+            CartItem(
+                id: oldProduct.id,
+                title: oldProduct.title,
+                price: oldProduct.price,
+                quantity: oldProduct.quantity - 1),
       );
-    }else{
+    } else {
       (_items).remove(productId);
     }
     notifyListeners();
   }
 
-  void removeProduct(String productId) {
-    _items.remove(productId);
+  void removeProduct(String id) {
+    _items.remove(id);
     notifyListeners();
   }
 
